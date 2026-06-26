@@ -1,5 +1,6 @@
 using System.Net.Http;
 using System.Text.Json;
+using System.Collections.Generic;
 using MeuIPTVPro.Models;
 
 namespace MeuIPTVPro.Services;
@@ -49,6 +50,39 @@ public class XtreamService
         {
             var baseUrl = NormalizeServer(server);
 
+            // Primeiro: buscar categorias reais
+            var categories = new Dictionary<string, string>();
+            try
+            {
+                var catUrl = $"{baseUrl}/player_api.php?username={Uri.EscapeDataString(username)}&password={Uri.EscapeDataString(password)}&action=get_live_categories";
+                var catJson = await _http.GetStringAsync(catUrl);
+                using var catDoc = JsonDocument.Parse(catJson);
+
+                if (catDoc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var c in catDoc.RootElement.EnumerateArray())
+                    {
+                        var id = Get(c, "category_id");
+                        if (string.IsNullOrWhiteSpace(id))
+                            id = Get(c, "id");
+
+                        var name = Get(c, "category_name");
+                        if (string.IsNullOrWhiteSpace(name))
+                            name = Get(c, "name");
+                        if (string.IsNullOrWhiteSpace(name))
+                            name = Get(c, "category");
+
+                        if (!string.IsNullOrWhiteSpace(id) && !categories.ContainsKey(id))
+                            categories[id] = name;
+                    }
+                }
+            }
+            catch
+            {
+                // falha ao buscar categorias: continua sem nomes legíveis
+            }
+
+            // Agora buscar canais
             var url =
                 $"{baseUrl}/player_api.php?username={Uri.EscapeDataString(username)}&password={Uri.EscapeDataString(password)}&action=get_live_streams";
 
@@ -61,14 +95,28 @@ public class XtreamService
 
             foreach (var item in doc.RootElement.EnumerateArray())
             {
-                channels.Add(new Channel
+                var categoryId = Get(item, "category_id");
+
+                // resolve category name from previously loaded categories
+                string categoryName = "";
+                if (!string.IsNullOrWhiteSpace(categoryId) && categories.TryGetValue(categoryId, out var cname))
+                    categoryName = cname;
+
+                if (string.IsNullOrWhiteSpace(categoryName))
+                    categoryName = "Sem categoria";
+
+                var channel = new Channel
                 {
                     Name = Get(item, "name"),
-                    Category = Get(item, "category_id"),
+                    // set Category to the readable name so UI bindings that use Category show the name
+                    Category = categoryName,
+                    CategoryName = categoryName,
                     LogoUrl = Get(item, "stream_icon"),
                     StreamUrl =
-                        $"{baseUrl}/live/{username}/{password}/{Get(item,"stream_id")}.m3u8"
-                });
+                        $"{baseUrl}/live/{username}/{password}/{Get(item, "stream_id")}.m3u8"
+                };
+
+                channels.Add(channel);
             }
         }
         catch

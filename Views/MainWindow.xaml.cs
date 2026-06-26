@@ -20,10 +20,22 @@ public partial class MainWindow : Window
 
     private LibVLC? _libVlc;
     private MediaPlayer? _mediaPlayer;
-    private bool _isCinemaMode;
+
+    private bool _isFullscreen;
+
     private WindowState _previousWindowState;
     private WindowStyle _previousWindowStyle;
     private ResizeMode _previousResizeMode;
+
+    private GridLength _previousMenuWidth;
+    private GridLength _previousListWidth;
+    private GridLength _previousControlsHeight;
+
+    private Thickness _previousPlayerFrameMargin;
+    private CornerRadius _previousPlayerFrameCornerRadius;
+
+    private int _previousPlayerColumn;
+    private int _previousPlayerColumnSpan;
 
     public MainWindow(string server, string username, string password)
     {
@@ -75,21 +87,25 @@ public partial class MainWindow : Window
             if (_allChannels.Count == 0)
             {
                 PlayerPlaceholder.Text = "Nenhum canal encontrado";
+
                 MessageBox.Show(
                     "Não foi possível carregar canais.\n\nConfira servidor, usuário, senha e compatibilidade Xtream.",
                     "Meu IPTV Pro",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+
                 return;
             }
 
             BuildCategories();
             ApplyFilters();
+
             PlayerPlaceholder.Text = "Selecione um canal";
         }
         catch
         {
             PlayerPlaceholder.Text = "Falha na conexão";
+
             MessageBox.Show(
                 "Não foi possível conectar ao servidor.",
                 "Meu IPTV Pro",
@@ -229,54 +245,114 @@ public partial class MainWindow : Window
 
     private void Fullscreen_Click(object sender, RoutedEventArgs e)
     {
-        ToggleCinemaMode();
+        ToggleFullscreen();
+    }
+
+    private void PlayerArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ClickCount == 2)
+        {
+            ToggleFullscreen();
+        }
     }
 
     private void Window_KeyDown(object sender, KeyEventArgs e)
     {
-        if (e.Key == Key.Escape && _isCinemaMode)
+        if (e.Key == Key.Escape && _isFullscreen)
         {
-            ToggleCinemaMode();
+            ExitFullscreen();
         }
     }
 
-    private void ToggleCinemaMode()
+    private void ToggleFullscreen()
     {
-        if (!_isCinemaMode)
+        if (_isFullscreen)
         {
-            _previousWindowState = WindowState;
-            _previousWindowStyle = WindowStyle;
-            _previousResizeMode = ResizeMode;
-
-            SideMenu.Visibility = Visibility.Collapsed;
-            ChannelPanel.Visibility = Visibility.Collapsed;
-            MenuColumn.Width = new GridLength(0);
-            ListColumn.Width = new GridLength(0);
-            PlayerControls.Visibility = Visibility.Collapsed;
-            ControlsRow.Height = new GridLength(0);
-            PlayerFrame.Margin = new Thickness(0);
-            PlayerFrame.CornerRadius = new CornerRadius(0);
-
-            WindowStyle = WindowStyle.None;
-            ResizeMode = ResizeMode.NoResize;
-            WindowState = WindowState.Maximized;
-            _isCinemaMode = true;
+            ExitFullscreen();
         }
         else
         {
-            SideMenu.Visibility = Visibility.Visible;
-            ChannelPanel.Visibility = Visibility.Visible;
-            MenuColumn.Width = new GridLength(220);
-            ListColumn.Width = new GridLength(390);
-            PlayerControls.Visibility = Visibility.Visible;
-            ControlsRow.Height = new GridLength(82);
-            PlayerFrame.Margin = new Thickness(18, 18, 18, 0);
-            PlayerFrame.CornerRadius = new CornerRadius(18);
-
-            WindowStyle = _previousWindowStyle;
-            ResizeMode = _previousResizeMode;
-            WindowState = _previousWindowState;
-            _isCinemaMode = false;
+            EnterFullscreen();
         }
+    }
+
+    private void EnterFullscreen()
+    {
+        if (_isFullscreen)
+        {
+            return;
+        }
+
+        _previousWindowState = WindowState;
+        _previousWindowStyle = WindowStyle;
+        _previousResizeMode = ResizeMode;
+
+        _previousMenuWidth = MenuColumn.Width;
+        _previousListWidth = ListColumn.Width;
+        _previousControlsHeight = ControlsRow.Height;
+
+        _previousPlayerFrameMargin = PlayerFrame.Margin;
+        _previousPlayerFrameCornerRadius = PlayerFrame.CornerRadius;
+
+        _previousPlayerColumn = Grid.GetColumn(PlayerArea);
+        _previousPlayerColumnSpan = Grid.GetColumnSpan(PlayerArea);
+
+        _isFullscreen = true;
+
+        SideMenu.Visibility = Visibility.Collapsed;
+        ChannelPanel.Visibility = Visibility.Collapsed;
+        PlayerControls.Visibility = Visibility.Collapsed;
+
+        MenuColumn.Width = new GridLength(0);
+        ListColumn.Width = new GridLength(0);
+        ControlsRow.Height = new GridLength(0);
+
+        Grid.SetColumn(PlayerArea, 0);
+        Grid.SetColumnSpan(PlayerArea, 3);
+
+        PlayerFrame.Margin = new Thickness(0);
+        PlayerFrame.CornerRadius = new CornerRadius(0);
+
+        Background = System.Windows.Media.Brushes.Black;
+        PlayerArea.Background = System.Windows.Media.Brushes.Black;
+        PlayerFrame.Background = System.Windows.Media.Brushes.Black;
+        VideoPlayer.Background = System.Windows.Media.Brushes.Black;
+
+        WindowState = WindowState.Normal;
+        WindowStyle = WindowStyle.None;
+        ResizeMode = ResizeMode.NoResize;
+        WindowState = WindowState.Maximized;
+    }
+
+    private void ExitFullscreen()
+    {
+        if (!_isFullscreen)
+        {
+            return;
+        }
+
+        _isFullscreen = false;
+
+        SideMenu.Visibility = Visibility.Visible;
+        ChannelPanel.Visibility = Visibility.Visible;
+        PlayerControls.Visibility = Visibility.Visible;
+
+        MenuColumn.Width = _previousMenuWidth;
+        ListColumn.Width = _previousListWidth;
+        ControlsRow.Height = _previousControlsHeight;
+
+        Grid.SetColumn(PlayerArea, _previousPlayerColumn);
+        Grid.SetColumnSpan(PlayerArea, _previousPlayerColumnSpan);
+
+        PlayerFrame.Margin = _previousPlayerFrameMargin;
+        PlayerFrame.CornerRadius = _previousPlayerFrameCornerRadius;
+
+        PlayerArea.Background = System.Windows.Media.Brushes.Black;
+        PlayerFrame.Background = System.Windows.Media.Brushes.Black;
+        VideoPlayer.Background = System.Windows.Media.Brushes.Black;
+
+        WindowStyle = _previousWindowStyle;
+        ResizeMode = _previousResizeMode;
+        WindowState = _previousWindowState;
     }
 }

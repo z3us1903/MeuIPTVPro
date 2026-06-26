@@ -5,34 +5,112 @@ namespace MeuIPTVPro.Models;
 
 public class Channel : INotifyPropertyChanged
 {
-    // Nome do canal mostrado na UI
     private string _name = "";
-    public string Name { get => _name; set { if (_name != value) { _name = value; OnPropertyChanged(); } } }
-
-    // Id da categoria (geralmente numérico em string)
     private string _category = "";
-    public string Category { get => _category; set { if (_category != value) { _category = value; OnPropertyChanged(); } } }
-
-    // Nome legível da categoria (preenchido pelo XtreamService)
     private string _categoryName = "";
-    public string CategoryName { get => _categoryName; set { if (_categoryName != value) { _categoryName = value; OnPropertyChanged(); OnPropertyChanged(nameof(DisplayCategory)); } } }
-
-    // URL do logo do canal
     private string _logoUrl = "";
-    public string LogoUrl { get => _logoUrl; set { if (_logoUrl != value) { _logoUrl = value; OnPropertyChanged(); } } }
-
-    // URL/Stream para reprodução
     private string _streamUrl = "";
-    public string StreamUrl { get => _streamUrl; set { if (_streamUrl != value) { _streamUrl = value; OnPropertyChanged(); } } }
+    private bool _isFavorite;
 
-    // Marca como favorito
-    private bool _isFavorite = false;
-    public bool IsFavorite { get => _isFavorite; set { if (_isFavorite != value) { _isFavorite = value; OnPropertyChanged(); OnPropertyChanged(nameof(FavoriteIcon)); } } }
+    public string Name
+    {
+        get => _name;
+        set
+        {
+            if (_name != value)
+            {
+                _name = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
-    // Texto exibido abaixo do nome: usa o nome legível da categoria quando disponível
-    public string DisplayCategory => !string.IsNullOrWhiteSpace(CategoryName) ? CategoryName : (!string.IsNullOrWhiteSpace(Category) ? Category : "Sem categoria");
+    public string Category
+    {
+        get => _category;
+        set
+        {
+            if (_category != value)
+            {
+                _category = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayCategory));
+            }
+        }
+    }
 
-    // Ícone simples (caracter) para favoritos — a UI pode usar este texto ou substituir por imagem
+    public string CategoryName
+    {
+        get => _categoryName;
+        set
+        {
+            if (_categoryName != value)
+            {
+                _categoryName = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(DisplayCategory));
+            }
+        }
+    }
+
+    public string DisplayCategory
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(CategoryName))
+            {
+                return CategoryName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(Category))
+            {
+                return Category;
+            }
+
+            return "Sem categoria";
+        }
+    }
+
+    public string LogoUrl
+    {
+        get => _logoUrl;
+        set
+        {
+            if (_logoUrl != value)
+            {
+                _logoUrl = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public string StreamUrl
+    {
+        get => _streamUrl;
+        set
+        {
+            if (_streamUrl != value)
+            {
+                _streamUrl = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsFavorite
+    {
+        get => _isFavorite;
+        set
+        {
+            if (_isFavorite != value)
+            {
+                _isFavorite = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(FavoriteIcon));
+            }
+        }
+    }
+
     public string FavoriteIcon => IsFavorite ? "★" : "☆";
 
     public override string ToString()
@@ -41,5 +119,9 @@ public class Channel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

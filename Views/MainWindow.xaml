@@ -165,26 +165,28 @@
                 </StackPanel>
 
                 <StackPanel Grid.Row="1">
-                    <Button Content=" TV Ao Vivo"
-                            Height="48"
-                            Margin="0,0,0,10"
-                            Background="{StaticResource Accent}"
-                            HorizontalContentAlignment="Left"/>
+                    <Button Content="TV Ao Vivo"
+Height="48"
+Margin="0,0,0,10"
+Background="{StaticResource Accent}"
+HorizontalContentAlignment="Left"
+Click="LiveTvButton_Click"/>
 
-                    <Button Content=" Filmes"
-                            Height="48"
-                            Margin="0,0,0,10"
-                            HorizontalContentAlignment="Left"/>
+                    <Button Content="Filmes"
+        Height="48"
+        Margin="0,0,0,10"
+        HorizontalContentAlignment="Left"/>
 
                     <Button Content=" Séries"
                             Height="48"
                             Margin="0,0,0,10"
                             HorizontalContentAlignment="Left"/>
 
-                    <Button Content="⭐ Favoritos"
-                            Height="48"
-                            Margin="0,0,0,10"
-                            HorizontalContentAlignment="Left"/>
+                    <Button Content="★ Favoritos"
+        Height="48"
+        Margin="0,0,0,10"
+        HorizontalContentAlignment="Left"
+        Click="FavoritesButton_Click"/>
 
                     <Button Content="⚙ Configurações"
                             Height="48"
@@ -345,13 +347,21 @@
                                                    TextTrimming="CharacterEllipsis"/>
                                     </StackPanel>
 
-                                    <TextBlock Grid.Column="2"
-                                               Text="☆"
-                                               Foreground="#F5C542"
-                                               FontSize="24"
-                                               FontWeight="Bold"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"/>
+                                    <Button Grid.Column="2"
+        Content="{Binding FavoriteIcon}"
+        CommandParameter="{Binding}"
+        Click="FavoriteButton_Click"
+        Background="Transparent"
+        BorderThickness="0"
+        Foreground="#F5C542"
+        FontSize="24"
+        FontWeight="Bold"
+        Padding="0"
+        Width="34"
+        Height="34"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Cursor="Hand"/>
                                 </Grid>
                             </Border>
                         </DataTemplate>

@@ -57,23 +57,41 @@ public class FavoritesService
         }
     }
 
+    public bool IsFavorite(Channel channel)
+    {
+        if (channel is null) return false;
+        var fav = LoadFavorites();
+        var id = !string.IsNullOrWhiteSpace(channel.StreamUrl) ? channel.StreamUrl : string.Empty;
+        return fav.Contains(id);
+    }
+
     public void ToggleFavorite(Channel channel)
     {
         if (channel is null)
             return;
 
         var fav = LoadFavorites();
-        if (fav.Contains(channel.StreamUrl))
+        var id = !string.IsNullOrWhiteSpace(channel.StreamUrl) ? channel.StreamUrl : string.Empty;
+        if (fav.Contains(id))
         {
-            fav.Remove(channel.StreamUrl);
+            fav.Remove(id);
             channel.IsFavorite = false;
         }
         else
         {
-            fav.Add(channel.StreamUrl);
+            fav.Add(id);
             channel.IsFavorite = true;
         }
 
         SaveFavorites(fav);
+    }
+
+    public void SaveFavoritesFromChannels(IEnumerable<Channel> channels)
+    {
+        var ids = channels.Where(c => c != null && c.IsFavorite)
+                          .Select(c => c.StreamUrl)
+                          .Where(s => !string.IsNullOrWhiteSpace(s))
+                          .Distinct();
+        SaveFavorites(ids);
     }
 }

@@ -17,6 +17,8 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<Channel> _channels = new();
     private readonly ObservableCollection<string> _categories = new();
     private List<Channel> _allChannels = new();
+    private readonly FavoritesService _favoritesService = new();
+    private bool _showOnlyFavorites = false;
 
     private LibVLC? _libVlc;
     private MediaPlayer? _mediaPlayer;
@@ -98,6 +100,14 @@ public partial class MainWindow : Window
             }
 
             BuildCategories();
+
+            // Carrega favoritos e marca os canais
+            var favs = _favoritesService.LoadFavorites();
+            foreach (var ch in _allChannels)
+            {
+                ch.IsFavorite = favs.Contains(ch.StreamUrl);
+            }
+
             ApplyFilters();
 
             PlayerPlaceholder.Text = "Selecione um canal";
@@ -149,6 +159,11 @@ public partial class MainWindow : Window
                 c.Name.Contains(term, StringComparison.OrdinalIgnoreCase));
         }
 
+        if (_showOnlyFavorites)
+        {
+            result = result.Where(c => c.IsFavorite);
+        }
+
         RefreshChannelList(result);
     }
 
@@ -171,6 +186,38 @@ public partial class MainWindow : Window
 
     private void CategoryBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
+        ApplyFilters();
+    }
+
+    private void FavoriteButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button btn && btn.CommandParameter is Channel channel)
+        {
+            _favoritesService.ToggleFavorite(channel);
+
+            // Se estivermos visualizando apenas favoritos e o canal foi removido, atualizar lista
+            if (_showOnlyFavorites && !channel.IsFavorite)
+            {
+                ApplyFilters();
+            }
+        }
+    }
+
+    private void FavoriteButton_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        // Prevenir seleção e dupla-clique de reprodução
+        e.Handled = true;
+    }
+
+    private void FavoritesButton_Click(object sender, RoutedEventArgs e)
+    {
+        _showOnlyFavorites = true;
+        ApplyFilters();
+    }
+
+    private void LiveTvButton_Click(object sender, RoutedEventArgs e)
+    {
+        _showOnlyFavorites = false;
         ApplyFilters();
     }
 

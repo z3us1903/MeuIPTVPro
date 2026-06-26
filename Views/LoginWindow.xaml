@@ -1,0 +1,40 @@
+<Window x:Class="MeuIPTVPro.Views.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Meu IPTV Pro - Login" Height="560" Width="900"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource BgBrush}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1.1*"/>
+            <ColumnDefinition Width="1*"/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{StaticResource PanelBrush}" Padding="42">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Meu IPTV Pro" Foreground="{StaticResource TextBrush}" FontSize="38" FontWeight="Bold"/>
+                <TextBlock Text="Seu player IPTV para Windows" Foreground="{StaticResource MutedTextBrush}" FontSize="18" Margin="0,12,0,0"/>
+                <TextBlock Text="Use com serviços autorizados compatíveis com login Xtream." Foreground="{StaticResource MutedTextBrush}" FontSize="14" TextWrapping="Wrap" Margin="0,30,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="1" Padding="46">
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="Entrar" Foreground="{StaticResource TextBrush}" FontSize="30" FontWeight="SemiBold"/>
+                <TextBlock Text="Informe os dados fornecidos pelo seu serviço IPTV autorizado." Foreground="{StaticResource MutedTextBrush}" TextWrapping="Wrap" Margin="0,8,0,28"/>
+
+                <TextBlock Text="Servidor" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,6"/>
+                <TextBox x:Name="ServerBox" Height="42" Margin="0,0,0,16"/>
+
+                <TextBlock Text="Usuário" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,6"/>
+                <TextBox x:Name="UserBox" Height="42" Margin="0,0,0,16"/>
+
+                <TextBlock Text="Senha" Foreground="{StaticResource MutedTextBrush}" Margin="0,0,0,6"/>
+                <PasswordBox x:Name="PasswordBox" Height="42" Margin="0,0,0,16"/>
+
+                <CheckBox x:Name="RememberBox" Content="Lembrar meus dados" Foreground="{StaticResource TextBrush}" Margin="0,0,0,22"/>
+                <Button Content="Entrar" Height="46" Click="Login_Click"/>
+                <TextBlock x:Name="StatusText" Foreground="#FFB86C" TextWrapping="Wrap" Margin="0,18,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
